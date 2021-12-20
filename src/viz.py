@@ -275,7 +275,7 @@ class Visualization:
 
         for graphic in sorted(self.graphics, key=lambda g: g.z):
             if isinstance(graphic, PathGraphic):
-                width = int(clamp(1, scale * 0.125, 16))
+                width = int(clamp(1, scale * 0.25, 16))
 
                 alpha_draw(
                     lambda draw: draw.line(
@@ -309,7 +309,7 @@ class Visualization:
             elif isinstance(graphic, DotGraphic):
                 center = to_pixel_space(graphic.center)
 
-                dot_radius = clamp(2, scale * 0.5, 32)
+                dot_radius = clamp(2, scale * 0.4, 32)
                 alpha_draw(
                     lambda draw: draw.ellipse(
                         [
