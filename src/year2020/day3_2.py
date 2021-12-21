@@ -7,6 +7,7 @@ expected_output = 5140884672
 
 
 def solution(input_lines):
+
     slopes_to_check = ((1, 1), (3, 1), (5, 1), (7, 1), (1, 2))
     slope_tree_counts = []
 
@@ -17,9 +18,8 @@ def solution(input_lines):
     all_trees_layer = viz.new_layer(color="green", z=-1)
     for line_index, line in enumerate(input_lines):
         for character_index, character in enumerate(line):
-            if character == '#':
+            if character == "#":
                 all_trees_layer.dot_at(character_index, line_index + 2)
-
 
     for slopes in slopes_to_check:
         slope_tree_counts.append(
@@ -32,7 +32,6 @@ def solution(input_lines):
 
 def trees_encountered_on_given_slope(slope, nested_list_containing_input):
     slope_layer = viz.new_layer()
-    hit_layer = viz.new_layer(color="red", z=+1)
 
     trees_encountered_on_path = 0
 
@@ -59,7 +58,6 @@ def trees_encountered_on_given_slope(slope, nested_list_containing_input):
         if skip_line_counter == 1:
             skip_line_counter = slope[1]
 
-
         current_location_on_line += slope[0]
 
         wrapped = current_location_on_line >= len(line)
@@ -72,7 +70,7 @@ def trees_encountered_on_given_slope(slope, nested_list_containing_input):
 
         if line[current_location_on_line] == "#":
             trees_encountered_on_path += 1
-            hit_layer.dot_at(current_location_on_line, current_line_count)
+            slope_layer.dot_at(current_location_on_line, current_line_count)
 
         else:
             pass
