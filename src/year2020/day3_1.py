@@ -37,15 +37,9 @@ def solution(input_lines):
             continue
 
         current_location_on_line += slope[0]
-
-        wrapped = current_location_on_line >= len(line)
         current_location_on_line = current_location_on_line % len(line)
 
-        if not wrapped:
-            viz.line_to(current_location_on_line, current_line_count)
-        else:
-            viz.move_to(current_location_on_line, current_line_count)
-
+        viz.line_to(current_location_on_line, current_line_count)
         if line[current_location_on_line] == "#":
             trees_encountered_on_path += 1
             line[current_location_on_line] = "X"
