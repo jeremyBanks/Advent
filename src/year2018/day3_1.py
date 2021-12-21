@@ -17,8 +17,8 @@ def solution(input_lines):
 
 def determine_locations_with_overlapping_claims(list_of_components):
 
-    locations_claimed = []
-    locations_with_overlapping_claims = [list_of_components]
+    locations_claimed = set()
+    locations_with_overlapping_claims = set()
 
     for component in list_of_components:
         current_x_coordinate = 0
@@ -30,7 +30,7 @@ def determine_locations_with_overlapping_claims(list_of_components):
         if (current_x_coordinate, current_y_coordinate) in locations_claimed:
             pass
         else:
-            locations_claimed.append((current_x_coordinate, current_y_coordinate))
+            locations_claimed.add((current_x_coordinate, current_y_coordinate))
 
         x_modifier = 0
         y_modifier = 0
@@ -48,9 +48,9 @@ def determine_locations_with_overlapping_claims(list_of_components):
                     adjusted_coordinates in locations_claimed
                     and adjusted_coordinates not in locations_with_overlapping_claims
                 ):
-                    locations_with_overlapping_claims.append(adjusted_coordinates)
+                    locations_with_overlapping_claims.add(adjusted_coordinates)
                 else:
-                    locations_claimed.append(adjusted_coordinates)
+                    locations_claimed.add(adjusted_coordinates)
 
             x_modifier += 1
 
