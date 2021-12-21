@@ -1,3 +1,5 @@
+# hic sunt dracones 🐉
+
 import sys
 from itertools import cycle
 from dataclasses import dataclass, astuple as as_tuple, field

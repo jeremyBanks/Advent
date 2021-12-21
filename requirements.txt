@@ -1,4 +1,7 @@
 black==21.12b0
+matplotlib==3.5.1
+numpy==1.21.5
+opencv-python==4.5.4.60
 pillow==8.4.0
 pytest-custom_exit_code==0.3.0
 pytest==6.2.5
