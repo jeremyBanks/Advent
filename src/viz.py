@@ -333,7 +333,7 @@ class Visualization:
         This blocks the script until the window is closed.
         """
 
-        max_render_seconds = 0.5
+        max_render_seconds = 2
         min_resolution_scale = 0.125
         resolution_scale_factor = (
             2.0  # per dimension, so rendering time effect is squared
@@ -352,9 +352,18 @@ class Visualization:
 
             remaining_time_seconds -= elapsed_seconds
 
-            estimated = "" if estimate is None else f" (estimated: {estimate:.2f}s)"
+            estimated = ""
+            if estimate is not None:
+                comparison = "+" if elapsed_seconds > estimate else "-"
+                delta = abs(elapsed_seconds - estimate)
+                if delta <= 0.15:
+                    estimated = " (≈ estimate)"
+                else:
+                    estimated = (
+                        f" ({comparison}{delta:3.1f}s of estimated {estimate:.1f}s)"
+                    )
             print(
-                f"[viz] rendered at {resolution_scale:.2f} in {elapsed_seconds:.2f}s{estimated} with {remaining_time_seconds:.2f}s remaining"
+                f"[viz] rendered at {resolution_scale * 100:3.0f}% quality in {elapsed_seconds:4.1f}s with {remaining_time_seconds:.1f}s remaining{estimated}"
             )
 
             estimate = (
