@@ -333,11 +333,10 @@ class Visualization:
         This blocks the script until the window is closed.
         """
 
-        max_render_seconds = 2
+        max_render_seconds = 0.125
         min_resolution_scale = 0.125
-        resolution_scale_factor = (
-            2.0  # per dimension, so rendering time effect is squared
-        )
+        # per dimension
+        resolution_scale_factor = 2.0
         max_resolution_scale = 8
 
         resolution_scale = min_resolution_scale
