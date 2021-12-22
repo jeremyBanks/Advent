@@ -1,6 +1,7 @@
 # hic sunt dracones 🐉
 
 import sys
+import time
 from itertools import cycle
 from dataclasses import dataclass, astuple as as_tuple, field
 from abc import ABC, abstractmethod
@@ -243,7 +244,7 @@ class Visualization:
         else:
             return Bounds(Point(0, 0), Point(1, 1))
 
-    def render(self):
+    def render(self, resolution_scale=1.0):
         bounds = self.bounds()
 
         bounds = bounds.padded(2)
@@ -251,9 +252,9 @@ class Visualization:
         bounds_height = bounds.max.y - bounds.min.y
 
         if bounds_width > bounds_height:
-            scale = MAX_SIZE / bounds_width
+            scale = int(MAX_SIZE * resolution_scale / bounds_width)
         else:
-            scale = MAX_SIZE / bounds_height
+            scale = int(MAX_SIZE * resolution_scale / bounds_height)
 
         to_pixel_space = Transformation(
             scale, scale, -bounds.min.x * scale, -bounds.min.y * scale
@@ -332,13 +333,54 @@ class Visualization:
         This blocks the script until the window is closed.
         """
 
-        image = self.render()
+        max_render_seconds = 0.5
+        min_resolution_scale = 0.125
+        resolution_scale_factor = (
+            2.0  # per dimension, so rendering time effect is squared
+        )
+        max_resolution_scale = 8
+
+        resolution_scale = min_resolution_scale
+        estimate = None
+
+        remaining_time_seconds = max_render_seconds
+
+        while True:
+            start_time = time.perf_counter()
+            image = self.render(resolution_scale=resolution_scale)
+            elapsed_seconds = time.perf_counter() - start_time
+
+            remaining_time_seconds -= elapsed_seconds
+
+            estimated = "" if estimate is None else f" (estimated: {estimate:.2f}s)"
+            print(
+                f"[viz] rendered at {resolution_scale:.2f} in {elapsed_seconds:.2f}s{estimated} with {remaining_time_seconds:.2f}s remaining"
+            )
+
+            estimate = (
+                elapsed_seconds * resolution_scale_factor * resolution_scale_factor
+            )
+            if estimate > remaining_time_seconds:
+                # probably don't have enough time to render at a higher resolution
+                break
+
+            if resolution_scale * resolution_scale_factor > max_resolution_scale:
+                break
+
+            resolution_scale *= resolution_scale_factor
 
         root = tk.Tk()
         root.title(f"Visualization - {sys.argv[0]}")
         root.resizable(False, False)
 
-        tk_image = ImageTk.PhotoImage(image)
+        scaled_image = image.resize(
+            (
+                int(image.width / resolution_scale),
+                int(image.height / resolution_scale),
+            ),
+            Image.BICUBIC,
+        )
+        tk_image = ImageTk.PhotoImage(scaled_image)
         panel = tk.Label(root, image=tk_image, borderwidth=0)
         panel.pack(fill="both", expand="yes")
 
