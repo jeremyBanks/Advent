@@ -1,3 +1,4 @@
+from .. import viz
 from ..functions import run_solution, read_input_and_store_values_in_nested_list
 import math
 
@@ -6,12 +7,20 @@ expected_output = 5140884672
 
 
 def solution(input_lines):
+    input_lines = input_lines[:64]
+
     slopes_to_check = ((1, 1), (3, 1), (5, 1), (7, 1), (1, 2))
     slope_tree_counts = []
 
     nested_list_containing_input = read_input_and_store_values_in_nested_list(
         input_lines
     )
+
+    trees = viz.new_layer(z=-1, color=(0x00, 0x80, 0x20))
+    for line_index, line in enumerate(nested_list_containing_input):
+        for character_index, character in enumerate(line):
+            if character == "#":
+                trees.dot_at(character_index, line_index)
 
     for slopes in slopes_to_check:
         slope_tree_counts.append(
@@ -23,6 +32,8 @@ def solution(input_lines):
 
 
 def trees_encountered_on_given_slope(slope, nested_list_containing_input):
+    layer = viz.new_layer()
+
     trees_encountered_on_path = 0
 
     first_line = True
@@ -36,6 +47,7 @@ def trees_encountered_on_given_slope(slope, nested_list_containing_input):
 
     skip_line_counter = slope[1]
 
+    first = True
     for line in nested_list_containing_input:
         if first_line == True:
             first_line = False
@@ -49,10 +61,20 @@ def trees_encountered_on_given_slope(slope, nested_list_containing_input):
             skip_line_counter = slope[1]
 
         current_location_on_line += slope[0]
+        wrapped = current_location_on_line >= len(line)
+
         current_location_on_line = current_location_on_line % len(line)
+
+        if wrapped or first:
+            layer.move_to(current_location_on_line, current_line_count)
+        else:
+            layer.line_to(current_location_on_line, current_line_count)
+        first = False
 
         if line[current_location_on_line] == "#":
             trees_encountered_on_path += 1
+
+            layer.dot_at(current_location_on_line, current_line_count)
 
         else:
             pass

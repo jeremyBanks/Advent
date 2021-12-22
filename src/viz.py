@@ -6,7 +6,6 @@ from dataclasses import dataclass, astuple as as_tuple, field
 from abc import ABC, abstractmethod
 
 import tkinter as tk
-from tkinter import ttk
 from tkinter.filedialog import asksaveasfile as ask_save_as_file
 from typing import Any, Iterable, List, Optional
 from PIL import Image, ImageTk, ImageDraw
@@ -18,32 +17,36 @@ import skimage
 MAX_SIZE = 720
 MIN_SIZE = 90
 
+rgb = lambda r, g, b: np.array([r, g, b], dtype=np.uint8)
+
+base_line_color = rgb(0x80, 0xFF, 0xD0)
+
 default_line_colors = iter(
     cycle(
         (
-            (0x80, 0xFF, 0xD0, 0xFF),
-            (0xD0, 0x80, 0xFF, 0xFF),
-            (0x80, 0xD0, 0xFF, 0xFF),
+            base_line_color,
+            np.roll(base_line_color, 1),
+            np.roll(base_line_color, 2),
         )
     )
 )
 
+base_arrow_color = (base_line_color >> 1) + [0x80, 0x80, 0x80]
+
 default_arrow_colors = iter(
     cycle(
-        (
-            (0x80, 0xFF, 0xD0, 0x80),
-            (0xD0, 0x80, 0xFF, 0x80),
-            (0x80, 0xD0, 0xFF, 0x80),
-        )
+        (base_arrow_color, np.roll(base_arrow_color, 1), np.roll(base_arrow_color, 2))
     )
 )
+
+base_arrow_color = base_line_color // 2
 
 default_dot_colors = iter(
     cycle(
         (
-            (0xC0, 0xFF, 0xE0, 0xFF),
-            (0xE0, 0xC0, 0xFF, 0xFF),
-            (0xC0, 0xE0, 0xFF, 0xFF),
+            base_arrow_color,
+            np.roll(base_arrow_color, 1),
+            np.roll(base_arrow_color, 2),
         )
     )
 )
@@ -139,7 +142,8 @@ class Layer:
     def line_to(self, x, y=None):
         """Moves the pen to the coordinates, stroking a line along the way."""
         if y is None:
-            y = self.y + 1
+            y = x
+            x = self.x + 1
 
         if self.current_path is None:
             self.current_path = PathGraphic(
@@ -284,7 +288,7 @@ class Visualization:
                 alpha_draw(
                     lambda draw: draw.line(
                         [as_tuple(to_pixel_space(point)) for point in graphic.points()],
-                        fill=graphic.color,
+                        fill=tuple(graphic.color),
                         width=width,
                         joint="curve",
                     )
@@ -298,14 +302,14 @@ class Visualization:
                     target = as_tuple(to_pixel_space(graphic.target))
                     draw.line(
                         [source, target],
-                        fill=graphic.color,
+                        fill=tuple(graphic.color),
                         width=width,
                     )
 
             elif isinstance(graphic, DotGraphic):
                 center = to_pixel_space(graphic.center)
 
-                dot_radius = clamp(2, scale * 0.4, 32)
+                dot_radius = clamp(1, scale * 0.3, 32)
                 alpha_draw(
                     lambda draw: draw.ellipse(
                         [
@@ -314,7 +318,7 @@ class Visualization:
                             center.x + dot_radius,
                             center.y + dot_radius,
                         ],
-                        fill=graphic.color,
+                        fill=tuple(graphic.color),
                     )
                 )
             else:
@@ -335,7 +339,7 @@ class Visualization:
         root.resizable(False, False)
 
         tk_image = ImageTk.PhotoImage(image)
-        panel = ttk.Label(root, image=tk_image)
+        panel = tk.Label(root, image=tk_image, borderwidth=0)
         panel.pack(fill="both", expand="yes")
 
         def save_as():
@@ -346,13 +350,13 @@ class Visualization:
                 title="Save Visualization As…",
             )
             if target_file is not None:
-                scaled_image.save(target_file)
+                image.save(target_file)
 
-        save_button = ttk.Button(root, text="Save As…", command=save_as)
+        save_button = tk.Button(root, text="Save As…", command=save_as)
         save_button.pack(fill="both", expand="yes", ipady=4)
         save_button.focus_set()
 
-        close_button = ttk.Button(root, text="Close", command=root.destroy)
+        close_button = tk.Button(root, text="Close", command=root.destroy)
         close_button.pack(fill="both", expand="yes", ipady=4)
         close_button.focus_set()
 
