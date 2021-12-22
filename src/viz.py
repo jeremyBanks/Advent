@@ -9,8 +9,10 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter.filedialog import asksaveasfile as ask_save_as_file
 from typing import Any, Iterable, List, Optional
-
 from PIL import Image, ImageTk, ImageDraw
+import numpy as np
+import scipy
+import skimage
 
 # Minimum and maximum pixel dimensions for the generated image.
 MAX_SIZE = 720
@@ -18,31 +20,31 @@ MIN_SIZE = 90
 
 default_line_colors = iter(
     cycle(
-        [
+        (
             (0x80, 0xFF, 0xD0, 0xFF),
             (0xD0, 0x80, 0xFF, 0xFF),
             (0x80, 0xD0, 0xFF, 0xFF),
-        ]
+        )
     )
 )
 
 default_arrow_colors = iter(
     cycle(
-        [
+        (
             (0x80, 0xFF, 0xD0, 0x80),
             (0xD0, 0x80, 0xFF, 0x80),
             (0x80, 0xD0, 0xFF, 0x80),
-        ]
+        )
     )
 )
 
 default_dot_colors = iter(
     cycle(
-        [
+        (
             (0xC0, 0xFF, 0xE0, 0xFF),
             (0xE0, 0xC0, 0xFF, 0xFF),
             (0xC0, 0xE0, 0xFF, 0xFF),
-        ]
+        )
     )
 )
 
@@ -237,7 +239,7 @@ class Visualization:
         else:
             return Bounds(Point(0, 0), Point(1, 1))
 
-    def render(self, oversample=1):
+    def render(self):
         bounds = self.bounds()
 
         bounds = bounds.padded(2)
@@ -245,9 +247,9 @@ class Visualization:
         bounds_height = bounds.max.y - bounds.min.y
 
         if bounds_width > bounds_height:
-            scale = int(MAX_SIZE * oversample) / bounds_width
+            scale = MAX_SIZE / bounds_width
         else:
-            scale = int(MAX_SIZE * oversample) / bounds_height
+            scale = MAX_SIZE / bounds_height
 
         to_pixel_space = Transformation(
             scale, scale, -bounds.min.x * scale, -bounds.min.y * scale
@@ -320,26 +322,19 @@ class Visualization:
 
         return image
 
-    def show(self, oversample=4):
+    def show(self):
         """Opens a window to display the current state of the visualization.
 
         This blocks the script until the window is closed.
         """
 
-        image = self.render(oversample=oversample)
+        image = self.render()
 
         root = tk.Tk()
         root.title(f"Visualization - {sys.argv[0]}")
         root.resizable(False, False)
 
-        scaled_image = image.resize(
-            (
-                int(image.width / oversample),
-                int(image.height / oversample),
-            ),
-            Image.BICUBIC,
-        )
-        tk_image = ImageTk.PhotoImage(scaled_image)
+        tk_image = ImageTk.PhotoImage(image)
         panel = ttk.Label(root, image=tk_image)
         panel.pack(fill="both", expand="yes")
 
